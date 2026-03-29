@@ -13,15 +13,15 @@ const App = () => {
   const [time, setTime] = useState(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   const [weather, setWeather] = useState({ temp: '--', city: 'Loading...' });
 
-  // 1. OAUTH HANDLER (Talks to your server.js)
+  // 1. OAUTH HANDLER (Fixed for Single-Site Deploy)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const code = urlParams.get('code');
 
     if (code) {
       setLoading(true);
-      // Ask our local server to swap the code for a real token
-      fetch('http://localhost:3001/auth/canvas', {
+      // Changed from localhost:3001 to a relative path /auth/canvas
+      fetch('/auth/canvas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code })
@@ -31,7 +31,6 @@ const App = () => {
         if (data.access_token) {
           localStorage.setItem('canvas_token', data.access_token);
           setToken(data.access_token);
-          // Clean the URL so the code doesn't sit in the address bar
           window.history.replaceState({}, document.title, "/");
         }
       })
@@ -65,7 +64,9 @@ const App = () => {
     if (!token) return;
     setLoading(true);
     try {
-      const response = await fetch('/api/v1/courses?include[]=enrollments', {
+      // NOTE: For a production app, you'd usually proxy these through your server.js 
+      // to avoid CORS errors. If these fail on Render, let me know!
+      const response = await fetch(`https://stridek12academy.com/api/v1/courses?include[]=enrollments`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -73,7 +74,7 @@ const App = () => {
         setCourses(data.filter(c => c.name));
       }
 
-      const eventRes = await fetch('/api/v1/planner/items', {
+      const eventRes = await fetch(`https://stridek12academy.com/api/v1/planner/items`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const eventData = await eventRes.json();
@@ -93,7 +94,8 @@ const App = () => {
   // 4. AUTH ACTIONS
   const handleLogin = () => {
     const clientId = '10000000000033';
-    const redirectUri = encodeURIComponent(window.location.origin); // http://localhost:5173
+    // Automatically uses the current URL (Localhost or Render)
+    const redirectUri = encodeURIComponent(window.location.origin); 
     const canvasUrl = `https://stridek12academy.com/login/oauth2/auth?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}`;
     
     window.location.href = canvasUrl;
