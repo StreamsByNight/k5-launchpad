@@ -8,14 +8,68 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Lexend:wght@400;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-      /* Prevent the "white flash" while the forest theme loads */
-      body {
+      /* --- YOUR CUSTOM CSS --- */
+      .ic-Layout-wrapper{max-width:100%!important}
+      .empty-border-box{background:#101010;content:"";display:block;height:3.5rem;margin-left:5px;margin-right:5px;width:.1rem}
+      
+      body, html {
+        font-family: 'Nunito', 'Poppins', sans-serif !important;
         margin: 0;
-        background-color: #f0f7ff;
-        font-family: 'Nunito', sans-serif;
+        padding: 0;
+        background-color: #f0f7ff; /* Fallback forest sky blue */
+      }
+
+      * { box-sizing: border-box; }
+      
+      [data-react-class]{height:100%!important}
+      .container-with-bg{background-color:#dfebfb!important}
+      .css-1j1gydm-view-panel__content{background-color:transparent!important}
+      
+      .full-window{
+        background-color:#add8e6;
+        height:100%!important;
+        left:0;
+        position:absolute;
+        width:100%
+      }
+
+      /* Dashboard Theme Backgrounds */
+      .dashboard-theme-winter{background-color:#76bde9!important}
+      .dashboard-theme-forest{background-color:#d9f1fd!important}
+      .dashboard-theme-space{background-color:#0e1d30!important}
+      .dashboard-theme-no_theme{background-color:#d9f1fd!important}
+
+      /* Component Styles */
+      .bubble-message {
+        background:#fff;
+        border:1px solid #000;
+        border-radius:6px!important;
+        box-shadow:0 2px 8px rgba(0,0,0,.15);
+        font-size:16px;
+        padding:12px 15px;
+        position:absolute;
+      }
+
+      #progress-bar-value span span span, #courses-progress-bar span span span {
+        background: linear-gradient(90deg, #1548e6, #62c7ff);
+        transition: all .3s ease-in-out;
+      }
+
+      /* React Component Bridge - Makes your CSS play nice with the Forest cards */
+      .course-card-hover:hover {
+        border-left: 4px solid #1548e6 !important;
+        border-right: 4px solid #1548e6 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+        transform: translateY(-2px);
+      }
+
+      #student-header-area {
+        padding: 10px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.3);
       }
     </style>
   </head>
@@ -25,11 +79,10 @@
     <script>
       (function() {
         try {
-          // Look into the Stride Parent window for the user data object
+          // Attempt to reach the parent window ENV object
           const strideUser = window.parent?.ENV?.user;
 
           if (strideUser) {
-            // Save it to a global window object so App.jsx can see it
             window.studentInfo = {
               firstName: strideUser.first_name || "Student",
               fullName: strideUser.name || "K5 Student",
@@ -38,7 +91,7 @@
             };
             console.log("Stride profile found:", window.studentInfo.firstName);
           } else {
-            // Fallback: This is what you see when testing outside of Stride
+            // Testing Fallback
             window.studentInfo = {
               firstName: "Explorer",
               fullName: "K5 Student",
@@ -47,7 +100,8 @@
             };
           }
         } catch (e) {
-          console.warn("Stride data blocked or not found. Using default.");
+          console.warn("Stride data access blocked. Running in standalone mode.");
+          window.studentInfo = { firstName: "Friend", grade: "K5", email: "Welcome!" };
         }
       })();
     </script>
