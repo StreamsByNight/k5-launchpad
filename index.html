@@ -4,78 +4,54 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>K5 Launchpad | Forest Theme</title>
+    <title>K5 Launchpad</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Lexend:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-      /* Prevent white flash during load */
+      /* Prevent the "white flash" while the forest theme loads */
       body {
         margin: 0;
-        background-color: #E3F2FD; /* Matches your sky blue */
-        overflow-x: hidden;
-      }
-      
-      #loading-screen {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: #E3F2FD;
-        z-index: 9999;
+        background-color: #f0f7ff;
         font-family: 'Nunito', sans-serif;
-        transition: opacity 0.5s ease;
       }
     </style>
   </head>
   <body>
-    <div id="loading-screen">
-      <h2 style="color: #0066FF;">Loading Alanah's Dashboard...</h2>
-    </div>
-
     <div id="root"></div>
 
-    <script type="module" src="/src/main.jsx"></script>
-
     <script>
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('loading-screen');
-        
+      (function() {
         try {
-          // Reach out to the Stride ENV object you found
+          // Look into the Stride Parent window for the user data object
           const strideUser = window.parent?.ENV?.user;
-          
+
           if (strideUser) {
-            // We save this to window.studentInfo so your React components 
-            // can use it inside main.jsx or App.jsx
+            // Save it to a global window object so App.jsx can see it
             window.studentInfo = {
-              firstName: strideUser.first_name,
-              fullName: strideUser.name,
-              email: strideUser.email,
-              grade: strideUser.grade_level
+              firstName: strideUser.first_name || "Student",
+              fullName: strideUser.name || "K5 Student",
+              email: strideUser.email || "No Email Found",
+              grade: strideUser.grade_level || "K5"
             };
-            console.log("Stride Data Captured:", window.studentInfo.fullName);
+            console.log("Stride profile found:", window.studentInfo.firstName);
+          } else {
+            // Fallback: This is what you see when testing outside of Stride
+            window.studentInfo = {
+              firstName: "Explorer",
+              fullName: "K5 Student",
+              email: "testing@stride.com",
+              grade: "4"
+            };
           }
         } catch (e) {
-          console.warn("Could not access Stride parent data - are you running locally?");
-          // Fallback for local testing
-          window.studentInfo = {
-            firstName: "Student",
-            fullName: "K5 Student",
-            email: "testing@k12.com",
-            grade: "4"
-          };
+          console.warn("Stride data blocked or not found. Using default.");
         }
-
-        // Hide loader after a short delay
-        setTimeout(() => {
-          if(loader) loader.style.opacity = '0';
-          setTimeout(() => loader.remove(), 500);
-        }, 800);
-      });
+      })();
     </script>
+
+    <script type="module" src="/main.jsx"></script>
   </body>
 </html>
