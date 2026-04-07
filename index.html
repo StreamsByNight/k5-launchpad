@@ -19,7 +19,7 @@
         font-family: 'Nunito', 'Poppins', sans-serif !important;
         margin: 0;
         padding: 0;
-        background-color: #f0f7ff; /* Fallback forest sky blue */
+        background-color: #f0f7ff;
       }
 
       * { box-sizing: border-box; }
@@ -58,7 +58,6 @@
         transition: all .3s ease-in-out;
       }
 
-      /* React Component Bridge - Makes your CSS play nice with the Forest cards */
       .course-card-hover:hover {
         border-left: 4px solid #1548e6 !important;
         border-right: 4px solid #1548e6 !important;
@@ -79,8 +78,8 @@
     <script>
       (function() {
         try {
-          // Attempt to reach the parent window ENV object
-          const strideUser = window.parent?.ENV?.user;
+          // Attempt to reach the parent window ENV object from Stride/Canvas
+          const strideUser = window.parent?.ENV?.user || window.ENV?.user;
 
           if (strideUser) {
             window.studentInfo = {
@@ -89,9 +88,8 @@
               email: strideUser.email || "No Email Found",
               grade: strideUser.grade_level || "K5"
             };
-            console.log("Stride profile found:", window.studentInfo.firstName);
           } else {
-            // Testing Fallback
+            // Testing Fallback for local development
             window.studentInfo = {
               firstName: "Explorer",
               fullName: "K5 Student",
@@ -100,12 +98,11 @@
             };
           }
         } catch (e) {
-          console.warn("Stride data access blocked. Running in standalone mode.");
           window.studentInfo = { firstName: "Friend", grade: "K5", email: "Welcome!" };
         }
       })();
     </script>
 
-    <script type="module" src="/main.jsx"></script>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
