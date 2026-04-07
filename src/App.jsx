@@ -17,7 +17,7 @@ const App = () => {
     grade: "K5"
   });
 
-  // Update clock every minute
+  // 1. CLOCK LOGIC - Makes the time update every minute
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -25,7 +25,7 @@ const App = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // 1. BULLETPROOF DATA FETCHING
+  // 2. DATA FETCHING Logic
   const fetchCanvasData = async () => {
     if (!token) return;
     setLoading(true);
@@ -43,7 +43,7 @@ const App = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const eventData = await eventRes.json();
-      // Safety check for the .slice error you saw
+      // Ensure we have an array before slicing to prevent crashes
       setEvents(Array.isArray(eventData) ? eventData.slice(0, 6) : []);
 
       // Get Announcements
@@ -57,7 +57,7 @@ const App = () => {
       }
     } catch (e) { 
       console.error("Stride API Error:", e);
-      setEvents([]); // Prevent crash if API fails
+      setEvents([]); // Safety fallback
     }
     setLoading(false);
   };
@@ -67,7 +67,7 @@ const App = () => {
     if (token) fetchCanvasData();
   }, [token]);
 
-  // 2. CELEBRATION TRIGGER
+  // 3. CELEBRATION TRIGGER
   useEffect(() => {
     if (!loading && courses.length > 0 && events.length === 0) {
       confetti({
@@ -79,6 +79,7 @@ const App = () => {
     }
   }, [events, loading, courses]);
 
+  // 4. AUTH & UTILS
   const handleLogin = () => {
     const clientId = '10000000000033';
     const redirectUri = encodeURIComponent(window.location.origin); 
@@ -88,15 +89,16 @@ const App = () => {
   const handleLogout = () => {
     localStorage.removeItem('canvas_token');
     setToken(null);
+    window.location.reload();
   };
 
   if (!token) {
     return (
       <div className="min-h-screen bg-[#f0f7ff] flex items-center justify-center p-6">
-        <div className="bg-white p-10 rounded-[3rem] shadow-2xl max-w-md w-full text-center">
-          <h1 className="text-5xl font-black text-blue-600 mb-2">k12®</h1>
-          <p className="font-bold text-slate-400 mb-6">Student Launchpad</p>
-          <button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl shadow-lg mt-8 transition-transform active:scale-95">
+        <div className="bg-white p-10 rounded-[3rem] shadow-2xl max-w-md w-full text-center border-b-8 border-blue-500">
+          <h1 className="text-6xl font-black text-blue-600 mb-2">k12®</h1>
+          <p className="text-slate-400 font-bold mb-8 uppercase tracking-widest">K5 Launchpad</p>
+          <button onClick={handleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl shadow-lg transition-transform active:scale-95">
             Launch Dashboard
           </button>
         </div>
@@ -118,7 +120,7 @@ const App = () => {
              <button onClick={() => setIsDark(!isDark)} className="p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-md hover:scale-105 transition-transform">
                {isDark ? <Sun className="text-yellow-400" /> : <Moon className="text-blue-600" />}
              </button>
-             <button onClick={fetchCanvasData} className={`p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-md ${loading ? 'animate-spin' : ''}`}>
+             <button onClick={fetchCanvasData} className={`p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-md ${loading ? 'animate-spin text-blue-500' : ''}`}>
                <RefreshCw size={20}/>
              </button>
              <button onClick={handleLogout} className="p-4 bg-red-50 text-red-500 rounded-2xl shadow-md hover:bg-red-500 hover:text-white transition-all">
@@ -128,10 +130,10 @@ const App = () => {
         </header>
 
         {/* CLOCK SECTION */}
-        <div className="mb-10 bg-gradient-to-br from-blue-600 to-blue-400 rounded-[3rem] p-10 text-white text-center shadow-2xl relative overflow-hidden">
+        <div className="mb-10 bg-gradient-to-br from-blue-600 to-blue-400 rounded-[3rem] p-12 text-white text-center shadow-2xl relative overflow-hidden">
              <div className="text-8xl font-black tracking-tighter relative z-10">{time}</div>
              <p className="font-bold opacity-80 uppercase tracking-widest mt-2 relative z-10">Ready for a great day of learning!</p>
-             <div className="absolute top-0 right-0 p-8 opacity-20"><CloudSun size={120}/></div>
+             <CloudSun className="absolute -right-4 -bottom-4 opacity-20" size={180} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
@@ -142,12 +144,12 @@ const App = () => {
             <div className="space-y-3">
               {events.length > 0 ? events.map((item, i) => (
                 <div key={i} className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-2xl border-l-4 border-orange-400">
-                  <p className="font-bold text-xs truncate">{item.plannable?.title || "Upcoming Task"}</p>
+                  <p className="font-bold text-xs truncate">{item.plannable?.title || "Upcoming Lesson"}</p>
                   <p className="text-[10px] text-orange-600 font-bold uppercase">{new Date(item.plannable_date).toLocaleDateString()}</p>
                 </div>
               )) : (
-                <div className="text-center py-6 bg-green-50 dark:bg-green-900/20 rounded-3xl">
-                  <PartyPopper className="mx-auto text-green-500 mb-2" />
+                <div className="text-center py-8 bg-green-50 dark:bg-green-900/20 rounded-3xl">
+                  <PartyPopper className="mx-auto text-green-500 mb-2" size={32} />
                   <p className="text-xs font-black text-green-700">All Lessons Done!</p>
                 </div>
               )}
@@ -161,9 +163,9 @@ const App = () => {
               {announcements.length > 0 ? announcements.map((news, i) => (
                 <div key={i} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
                   <p className="font-bold text-xs line-clamp-1">{news.title}</p>
-                  <p className="text-[10px] opacity-60 mt-1 truncate">Sent by {news.author?.display_name || "School"}</p>
+                  <p className="text-[10px] opacity-60 mt-1 truncate">Sent by {news.author?.display_name || "School Admin"}</p>
                 </div>
-              )) : <p className="text-xs text-slate-400 font-bold text-center py-6">No new news.</p>}
+              )) : <p className="text-xs text-slate-400 font-bold text-center py-8">No new news.</p>}
             </div>
           </div>
 
@@ -171,7 +173,7 @@ const App = () => {
           <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 shadow-xl border border-white/50">
             <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-green-500"><Mail size={20}/> Teachers</h3>
             <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {courses.map((course, i) => {
+              {courses.length > 0 ? courses.map((course, i) => {
                 const teacher = course.teachers?.[0];
                 return (
                   <div key={i} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-2xl">
@@ -184,7 +186,7 @@ const App = () => {
                     </a>
                   </div>
                 );
-              })}
+              }) : <p className="text-xs text-slate-400 text-center py-8">Loading teachers...</p>}
             </div>
           </div>
         </div>
@@ -203,7 +205,7 @@ const App = () => {
                     </div>
                   </div>
                   <h4 className="font-black text-sm mb-4 h-10 overflow-hidden line-clamp-2">{course.name}</h4>
-                  <a href={`https://stridek12academy.com/courses/${course.id}`} target="_blank" rel="noreferrer" className="block w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase text-center tracking-widest shadow-lg">Enter Class</a>
+                  <a href={`https://stridek12academy.com/courses/${course.id}`} target="_blank" rel="noreferrer" className="block w-full py-4 bg-blue-600 text-white rounded-2xl text-[10px] font-black uppercase text-center tracking-widest shadow-lg hover:bg-blue-700 transition-colors">Enter Class</a>
                 </div>
               ))}
           </div>
